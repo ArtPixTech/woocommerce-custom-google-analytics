@@ -1,4 +1,4 @@
-=== Plugin Name ===
+### Plugin Name
 Contributors: Scanerrr
 Tags: ga, google analytic, google-analytic, google analytics, google-analytics
 Requires at least: 3.0.1
@@ -9,12 +9,12 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
 
-== Description ==
+## Description
 
 This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
 
 
-== Installation ==
+## Installation
 
 This section describes how to install the plugin and get it working.
 
@@ -24,7 +24,7 @@ This section describes how to install the plugin and get it working.
 4. Install and activate the plugin through the 'Plugins' menu in WordPress
 5. Place `Google Analytics Tracking ID` on plugin option page
 
-== Frequently Asked Questions ==
+## Frequently Asked Questions
 
 = A question that someone might have =
 
@@ -34,7 +34,7 @@ An answer to that question.
 
 Answer to foo bar dilemma.
 
-== Changelog ==
+## Changelog
 
 = 1.0 =
 * Release plugin.
