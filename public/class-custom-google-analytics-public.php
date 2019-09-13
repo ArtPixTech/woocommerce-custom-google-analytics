@@ -214,7 +214,7 @@ class Custom_Google_Analytics_Public {
 			if ( 'variation' === $productType || 'variable' === $productType ) {
 				// if product name not contains 3D in title
 				if ( strpos( strtolower( $product->get_name() ), '3d' ) === false ) {
-					$imageConversion = wc_get_order_item_meta( $item->get_id(), 'Convert Image from 2D to 3D? (&#36;25)', true );
+					$imageConversion = wc_get_order_item_meta( $item->get_id(), 'Convert Image from 2D to 3D? ($25)', true );
 					$dimension       = $imageConversion === 'Yes' ? '' : '2D';
 				}
 
@@ -223,6 +223,7 @@ class Custom_Google_Analytics_Public {
 				$parentProduct = wc_get_product( $product->get_parent_id() );
 				if ( count( $parentProduct->get_children() ) > 1 ) {
 					$size = $product->get_attribute( 'size' );
+					$size = explode( ' ', trim( $size ) )[0]; // trim "Medium (2.8"x4"x2.4") $129.00"
 				}
 
 			}
