@@ -3,7 +3,7 @@
 /**
  * Fired during plugin deactivation
  *
- * @link        
+ * @link
  * @since      1.0.0
  *
  * @package    Custom_Google_Analytics
