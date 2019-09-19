@@ -42,6 +42,19 @@ class Custom_Google_Analytics_Public {
 	 */
 	private $version;
 
+	protected $affiliation = 'ArtPix 3D Shop';
+	protected $brand = 'ArtPix 3D';
+	protected $meta_key = '_order_key_analytic_success';
+
+	/**
+	 * The analytics instance.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      Analytics.
+	 */
+	protected $analytics;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -55,51 +68,16 @@ class Custom_Google_Analytics_Public {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 
-	}
+		$this->analytics = new Analytics();
 
-	/**
-	 * Register the stylesheets for the public-facing side of the site.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Custom_Google_Analytics_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Custom_Google_Analytics_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/custom-google-analytics-public.css', array(), $this->version, 'all' );
-
-	}
-
-	/**
-	 * Register the JavaScript for the public-facing side of the site.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Custom_Google_Analytics_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Custom_Google_Analytics_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/custom-google-analytics-public.js', array( 'jquery' ), $this->version, false );
+		// Build the order data programmatically, including each order product in the payload
+		// Take notice, if you want GA reports to tie this event with previous user actions
+		// you must get and set the same ClientId from the GA Cookie
+		// First, general and required hit data
+		$this->analytics->setProtocolVersion( '1' )
+		                ->setTrackingId( esc_attr( get_option( 'cga_tracking_id' ) ) )
+		                ->setClientId( $this->get_ga_client_id() )
+		                ->setAffiliation( $this->affiliation );
 
 	}
 
@@ -161,43 +139,36 @@ class Custom_Google_Analytics_Public {
 		);
 	}
 
-	public function purchase_tracking_with_variation( $orderId, $posted_data, $order ) {
-		$meta_key = '_order_key_analytic_success';
-
-		if ( ! $orderId || ! $order ) {
-			return;
+	// Handle the parsing of the _ga cookie or setting it to a unique identifier
+	protected function get_ga_client_id() {
+		if ( isset( $_COOKIE['_ga'] ) ) {
+			list( $version, $domainDepth, $cid1, $cid2 ) = explode( '.', $_COOKIE['_ga'], 4 );
+			$contents = [ 'version' => $version, 'domainDepth' => $domainDepth, 'cid' => $cid1 . '.' . $cid2 ];
+			$cid      = $contents['cid'];
+		} else {
+			$cid = $this->gen_uuid();
 		}
 
-		if ( get_post_meta( $orderId, $meta_key, true ) == 1 ) {
-			return;
-		}
+		return $cid;
+	}
 
-		$analytics = new Analytics();
-
-		// Build the order data programmatically, including each order product in the payload
-		// Take notice, if you want GA reports to tie this event with previous user actions
-		// you must get and set the same ClientId from the GA Cookie
-		// First, general and required hit data
-		$analytics->setProtocolVersion( '1' )
-		          ->setCurrencyCode( $order->get_currency() )
-		          ->setTrackingId( esc_attr( get_option( 'cga_tracking_id' ) ) )
-		          ->setClientId( $this->get_ga_client_id() );
-
+	protected function get_coupons( $order ) {
 		if ( version_compare( WC_VERSION, '3.7', '<' ) ) {
 			$coupons = $order->get_used_coupons();
 		} else {
 			$coupons = $order->get_coupon_codes();
 		}
 
-		// Then, include the transaction data
-		$analytics->setTransactionId( $orderId )
-		          ->setAffiliation( 'ArtPix 3D Shop' )
-		          ->setRevenue( number_format( $order->get_total(), 2, '.', '' ) )
-		          ->setTax( number_format( $order->get_total_tax(), 2, '.', '' ) )
-		          ->setShipping( number_format( $order->get_shipping_total(), 2, '.', '' ) )
-		          ->setCouponCode( implode( ',', $coupons ) );
+		return implode( ',', $coupons );
+	}
 
+	protected function format_number( $number ) {
+		return number_format( $number, 2, '.', '' );
+	}
+
+	protected function get_products( $order ) {
 		$itemPosition = 0;
+		$products     = [];
 
 		foreach ( $order->get_items() as $item ) {
 			$product = $item->get_product();
@@ -234,46 +205,160 @@ class Custom_Google_Analytics_Public {
 
 			$categories = join( '/', $categories );
 
-			$productData = [
+			$products[] = [
 				'sku'         => $sku,
 				'name'        => $name,
-				'brand'       => 'ArtPix 3D',
-				'coupon_code' => $coupons,
+				'brand'       => $this->brand,
+				'coupon_code' => $this->get_coupons( $order ),
 				'category'    => $categories,
 				'variant'     => $size,
-				'price'       => number_format( $item->get_subtotal(), 2, '.', '' ),
+				'price'       => $this->format_number( $item->get_subtotal() ),
 				'quantity'    => $item->get_quantity(),
 				'position'    => ++ $itemPosition
 			];
 
-			$analytics->addProduct( $productData );
 		}
 
-		// Don't forget to set the product action, in this case to PURCHASE
-		$analytics->setProductActionToPurchase();
+		return $products;
+	}
 
-		// Finally, you must send a hit, in this case we send an Event
-		$analytics->setEventCategory( 'Enhanced Ecommerce' )
-		          ->setEventAction( 'Purchase' )
-		          ->setNonInteractionHit( true )
-		          ->sendEvent();
+	protected function is_transaction_tracked( $orderId ) {
+		return get_post_meta( $orderId, $this->meta_key, true ) == 1;
+	}
+
+	protected function write_log( $log ) {
+		$destination = CUSTOM_GOOGLE_ANALYTICS_PATH . 'debug.log';
+
+		if ( is_array( $log ) || is_object( $log ) ) {
+			error_log( "---------------" . PHP_EOL . print_r( $log, true ), 3, $destination );
+		} else {
+			error_log( "---------------" . PHP_EOL . $log, 3, $destination );
+		}
+	}
+
+
+	public function track_purchase( $orderId, $posted_data, $order ) {
+		if ( ! $orderId || ! $order || $this->is_transaction_tracked( $orderId ) ) {
+			return;
+		}
+
+		// Then, include the transaction data
+		$this->analytics->setCurrencyCode( $order->get_currency() )
+		                ->setTransactionId( $orderId )
+		                ->setRevenue( $this->format_number( $order->get_total() ) )
+		                ->setTax( $this->format_number( $order->get_total_tax() ) )
+		                ->setShipping( $this->format_number( $order->get_shipping_total() ) )
+		                ->setCouponCode( $this->get_coupons( $order ) );
+
+
+		$products = $this->get_products( $order );
+		foreach ( $products as $product ) {
+			$this->analytics->addProduct( $product );
+		}
+
+		$this->analytics->setProductActionToPurchase();
+
+		$response = $this->analytics->setEventCategory( 'Enhanced Ecommerce' )
+		                            ->setEventAction( 'Purchase' )
+		                            ->setNonInteractionHit( true )
+		                            ->sendEvent();
 
 		//add to database and continue
-		update_post_meta( $orderId, $meta_key, 1 );
+		update_post_meta( $orderId, $this->meta_key, 1 );
+
+		$this->write_log( [
+			'EVENT'          => 'TRACK PURCHASE',
+			'order_id'       => $orderId,
+			'HttpStatusCode' => $response->getHttpStatusCode(),
+			'RequestUrl'     => $response->getRequestUrl(),
+			'products'       => $products,
+			'cookie'         => $_COOKIE
+		] );
 	}
 
+	public function reverse_transaction( $orderId ) {
+		$order = wc_get_order( $orderId );
 
-	// Handle the parsing of the _ga cookie or setting it to a unique identifier
-	protected function get_ga_client_id() {
-		if ( isset( $_COOKIE['_ga'] ) ) {
-			list( $version, $domainDepth, $cid1, $cid2 ) = explode( '[\.]', $_COOKIE['_ga'], 4 );
-			$contents = [ 'version' => $version, 'domainDepth' => $domainDepth, 'cid' => $cid1 . '.' . $cid2 ];
-			$cid      = $contents['cid'];
-		} else {
-			$cid = $this->gen_uuid();
+		if ( ! $orderId || ! $order || ! $this->is_transaction_tracked( $orderId ) ) {
+			return;
 		}
 
-		return $cid;
+		// Then, include the transaction data
+		$this->analytics->setCurrencyCode( $order->get_currency() )
+		                ->setTransactionId( $orderId )
+		                ->setRevenue( - 1 * $this->format_number( $order->get_total() ) )
+		                ->setTax( - 1 * $this->format_number( $order->get_total_tax() ) )
+		                ->setShipping( - 1 * $this->format_number( $order->get_shipping_total() ) )
+		                ->setCouponCode( $this->get_coupons( $order ) );
+
+
+		$products = $this->get_products( $order );
+		foreach ( $products as $product ) {
+			$product['quantity'] *= - 1; // reverse quantity
+			$this->analytics->addProduct( $product );
+		}
+
+		$this->analytics->setProductActionToPurchase();
+
+		$response = $this->analytics->setEventCategory( 'Enhanced Ecommerce' )
+		                            ->setEventAction( 'Purchase' )
+		                            ->setNonInteractionHit( true )
+		                            ->sendEvent();
+
+		//add to database and continue
+		delete_post_meta( $orderId, $this->meta_key );
+
+		$this->write_log( [
+			'EVENT'          => 'REVERT PURCHASE',
+			'order_id'       => $orderId,
+			'HttpStatusCode' => $response->getHttpStatusCode(),
+			'RequestUrl'     => $response->getRequestUrl()
+		] );
 	}
 
+	public function refund_transaction( $orderId ) {
+		$order = wc_get_order( $orderId );
+
+		if ( ! $orderId || ! $order || ! $this->is_transaction_tracked( $orderId ) ) {
+			return;
+		}
+
+		$this->analytics
+			->setTransactionId( $orderId )
+			->setRevenue( $this->format_number( $order->get_total_refunded() ) )
+			->setTax( $this->format_number( $order->get_total_tax_refunded() ) )
+			->setShipping( $this->format_number( $order->get_total_shipping_refunded() ) );
+
+		foreach ( $order->get_items() as $itemId => $item ) {
+			$product = $item->get_product();
+
+			$sku = trim( $product->get_sku() );
+
+			if ( ! $sku ) {
+				$sku = $product->get_id();
+			}
+
+			$product = [
+				'sku'      => $sku,
+				'quantity' => $order->get_qty_refunded_for_item( $itemId )
+			];
+
+			$this->analytics->addProduct( $product );
+		}
+
+		$this->analytics->setProductActionToRefund();
+
+		$response = $this->analytics->setEventCategory( 'Enhanced Ecommerce' )
+		                            ->setEventAction( 'Refund' )
+		                            ->setNonInteractionHit( true )
+		                            ->sendEvent();
+
+		$this->write_log( [
+			'EVENT'          => 'REFUND PURCHASE',
+			'order_id'       => $orderId,
+			'HttpStatusCode' => $response->getHttpStatusCode(),
+			'RequestUrl'     => $response->getRequestUrl()
+		] );
+
+	}
 }

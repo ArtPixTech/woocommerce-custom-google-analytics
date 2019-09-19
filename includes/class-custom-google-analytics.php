@@ -6,7 +6,7 @@
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link        
+ * @link
  * @since      1.0.0
  *
  * @package    Custom_Google_Analytics
@@ -35,7 +35,7 @@ class Custom_Google_Analytics {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      Custom_Google_Analytics_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      Custom_Google_Analytics_Loader $loader Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -44,7 +44,7 @@ class Custom_Google_Analytics {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
+	 * @var      string $plugin_name The string used to uniquely identify this plugin.
 	 */
 	protected $plugin_name;
 
@@ -53,7 +53,7 @@ class Custom_Google_Analytics {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      string    $version    The current version of the plugin.
+	 * @var      string $version The current version of the plugin.
 	 */
 	protected $version;
 
@@ -129,8 +129,9 @@ class Custom_Google_Analytics {
 
 		$plugin_admin = new Custom_Google_Analytics_Admin( $this->get_plugin_name(), $this->get_version() );
 
-        $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_page' );
-        $this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
+		$this->loader->add_filter( 'plugin_action_links_' . CUSTOM_GOOGLE_ANALYTICS_BASENAME, $plugin_admin, 'add_action_links' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_page' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
 
 	}
 
@@ -145,7 +146,9 @@ class Custom_Google_Analytics {
 
 		$plugin_public = new Custom_Google_Analytics_Public( $this->get_plugin_name(), $this->get_version() );
 
-		$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'purchase_tracking_with_variation', 10, 3 );
+		$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'track_purchase', 10, 3 );
+		$this->loader->add_action( 'woocommerce_order_status_failed', $plugin_public, 'reverse_transaction' );
+		$this->loader->add_action( 'woocommerce_order_refunded', $plugin_public, 'refund_transaction' );
 
 	}
 
@@ -162,8 +165,8 @@ class Custom_Google_Analytics {
 	 * The name of the plugin used to uniquely identify it within the context of
 	 * WordPress and to define internationalization functionality.
 	 *
-	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
+	 * @since     1.0.0
 	 */
 	public function get_plugin_name() {
 		return $this->plugin_name;
@@ -172,8 +175,8 @@ class Custom_Google_Analytics {
 	/**
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
-	 * @since     1.0.0
 	 * @return    Custom_Google_Analytics_Loader    Orchestrates the hooks of the plugin.
+	 * @since     1.0.0
 	 */
 	public function get_loader() {
 		return $this->loader;
@@ -182,8 +185,8 @@ class Custom_Google_Analytics {
 	/**
 	 * Retrieve the version number of the plugin.
 	 *
-	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
+	 * @since     1.0.0
 	 */
 	public function get_version() {
 		return $this->version;

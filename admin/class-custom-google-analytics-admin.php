@@ -116,4 +116,10 @@ class Custom_Google_Analytics_Admin {
 		] );
 	}
 
+	public function add_action_links( $links ) {
+		$links[] = '<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">Settings</a>';
+
+		return array_reverse( $links );
+	}
+
 }
