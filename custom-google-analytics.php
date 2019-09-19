@@ -8,17 +8,17 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link               
+ * @link
  * @since             1.0.0
  * @package           Custom_Google_Analytics
  *
  * @wordpress-plugin
  * Plugin Name:       Custom Google Analytics
- * Plugin URI:         
+ * Plugin URI:
  * Description:       Handles woocommerce purchase/transactions information
  * Version:           1.0.0
  * Author:            Scanerrr
- * Author URI:         
+ * Author URI:
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       custom-google-analytics
@@ -37,6 +37,9 @@ if ( ! defined( 'WPINC' ) ) {
  */
 define( 'CUSTOM_GOOGLE_ANALYTICS_VERSION', '1.0.0' );
 
+define( 'CUSTOM_GOOGLE_ANALYTICS_PATH', plugin_dir_path( __FILE__ ) );
+define( 'CUSTOM_GOOGLE_ANALYTICS_BASENAME', plugin_basename( __FILE__ ) );
+
 /**
  * Include composer autoloader.
  */
@@ -47,7 +50,7 @@ require_once 'vendor/autoload.php';
  * This action is documented in includes/class-custom-google-analytics-activator.php
  */
 function activate_custom_google_analytics() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-custom-google-analytics-activator.php';
+	require_once CUSTOM_GOOGLE_ANALYTICS_PATH . 'includes/class-custom-google-analytics-activator.php';
 	Custom_Google_Analytics_Activator::activate();
 }
 
@@ -56,7 +59,7 @@ function activate_custom_google_analytics() {
  * This action is documented in includes/class-custom-google-analytics-deactivator.php
  */
 function deactivate_custom_google_analytics() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-custom-google-analytics-deactivator.php';
+	require_once CUSTOM_GOOGLE_ANALYTICS_PATH . 'includes/class-custom-google-analytics-deactivator.php';
 	Custom_Google_Analytics_Deactivator::deactivate();
 }
 
@@ -67,7 +70,7 @@ register_deactivation_hook( __FILE__, 'deactivate_custom_google_analytics' );
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-custom-google-analytics.php';
+require CUSTOM_GOOGLE_ANALYTICS_PATH . 'includes/class-custom-google-analytics.php';
 
 /**
  * Begins execution of the plugin.
