@@ -1,0 +1,11 @@
+{
+	"name": "Custom Google Analytics",
+	"version": "1.1.1",
+	"download_url": "https://github.com/ArtPixTech/woocommerce-custom-google-analytics/releases/download/v1.1.1/woocommerce-custom-google-analytics.zip",
+
+	"sections": {
+		"description": "(Required) Plugin description. Basic HTML can be used in all sections.",
+		"installation": "(Recommended) Installation instructions.",
+		"changelog": "= 1.1.1 =\n* Add meta data for plugin updates.\n\n= 1.1.0 =\n* Actualize readme.md.\n* Get first word of size.\n* Improve admin settings.\n* New Logic for GA.\n* Send data when order status \"Processing\".\n* Auto updater.\n\n= 1.0.1 =\n* Edit readme.\n\n= 1.0 =\n* Release plugin."
+	}
+}

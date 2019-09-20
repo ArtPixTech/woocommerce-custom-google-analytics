@@ -50,10 +50,12 @@ require_once 'vendor/autoload.php';
  * */
 require 'plugin-update-checker/plugin-update-checker.php';
 $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
-	'https://github.com/ArtPixTech/woocommerce-custom-google-analytics-plugin/',
+	'https://github.com/ArtPixTech/woocommerce-custom-google-analytics/blob/master/meta.json',
 	__FILE__,
-	'custom-google-analytics'
+	'woocommerce-custom-google-analytics' // plugin dir name
 );
+
+$myUpdateChecker->getVcsApi()->enableReleaseAssets();
 
 /**
  * The code that runs during plugin activation.
