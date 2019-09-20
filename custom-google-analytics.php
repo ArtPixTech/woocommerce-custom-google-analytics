@@ -45,6 +45,9 @@ define( 'CUSTOM_GOOGLE_ANALYTICS_BASENAME', plugin_basename( __FILE__ ) );
  */
 require_once 'vendor/autoload.php';
 
+/*
+ * Init auto-updates
+ * */
 require 'plugin-update-checker/plugin-update-checker.php';
 $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
 	'https://github.com/ArtPixTech/woocommerce-custom-google-analytics-plugin/',
