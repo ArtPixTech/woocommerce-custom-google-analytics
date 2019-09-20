@@ -146,7 +146,8 @@ class Custom_Google_Analytics {
 
 		$plugin_public = new Custom_Google_Analytics_Public( $this->get_plugin_name(), $this->get_version() );
 
-		$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'track_purchase', 10, 3 );
+		$this->loader->add_action( 'woocommerce_checkout_order_processed', $plugin_public, 'track_purchase' );
+		$this->loader->add_action( 'woocommerce_order_status_processing', $plugin_public, 'track_purchase' );
 		$this->loader->add_action( 'woocommerce_order_status_failed', $plugin_public, 'reverse_transaction' );
 		$this->loader->add_action( 'woocommerce_order_refunded', $plugin_public, 'refund_transaction' );
 
