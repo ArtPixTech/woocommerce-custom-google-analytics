@@ -50,7 +50,7 @@ require_once 'vendor/autoload.php';
  * */
 require 'plugin-update-checker/plugin-update-checker.php';
 $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
-	plugin_dir_url(__FILE__) . 'meta.json',
+	'https://artpix3d.com/meta.json',
 	__FILE__,
 	'woocommerce-custom-google-analytics' // plugin dir name
 );
