@@ -28,6 +28,9 @@ This section describes how to install the plugin and get it working.
 
 == Changelog ==
 
+= 1.1.2 =
+* Fix meta data for plugin updates.
+
 = 1.1.1 =
 * Add meta data for plugin updates.
 
