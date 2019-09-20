@@ -45,6 +45,13 @@ define( 'CUSTOM_GOOGLE_ANALYTICS_BASENAME', plugin_basename( __FILE__ ) );
  */
 require_once 'vendor/autoload.php';
 
+require 'plugin-update-checker/plugin-update-checker.php';
+$myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
+	'https://github.com/ArtPixTech/woocommerce-custom-google-analytics-plugin/',
+	__FILE__,
+	'custom-google-analytics'
+);
+
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-custom-google-analytics-activator.php
