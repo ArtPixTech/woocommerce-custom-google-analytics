@@ -16,7 +16,7 @@
  * Plugin Name:       Custom Google Analytics
  * Plugin URI:
  * Description:       Handles woocommerce purchase/transactions information
- * Version:           1.0.0
+ * Version:           1.1.2
  * Author:            Scanerrr
  * Author URI:
  * License:           GPL-2.0+
@@ -55,7 +55,7 @@ $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
 	'woocommerce-custom-google-analytics' // plugin dir name
 );
 
-$myUpdateChecker->getVcsApi()->enableReleaseAssets();
+//$myUpdateChecker->getVcsApi()->enableReleaseAssets();
 
 /**
  * The code that runs during plugin activation.
