@@ -240,7 +240,7 @@ class Custom_Google_Analytics_Public {
 	public function track_purchase( $orderId ) {
 		$order = wc_get_order( $orderId );
 
-		if ( ! $orderId || ! $order || $this->is_transaction_tracked( $orderId ) ) {
+		if ( ! $orderId || ! $order || $this->is_transaction_tracked( $orderId ) || !$order->has_status("processing")) {
 			return;
 		}
 
